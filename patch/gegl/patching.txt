@@ -1,0 +1,17 @@
+## Howto apply the patch, to get version 0.02:
+## 
+
+$ wget http://decapode314.free.fr/ocaml/gegl/dl/gegl-ocaml-0.01.zip
+$ wget http://decapode314.free.fr/ocaml/gegl/dl/gegl-ocaml-0.02.patch
+
+$ unzip gegl-ocaml-0.01.zip
+
+$ cd gegl-ocaml-0.01/
+
+$ patch -p1 < ../gegl-ocaml-0.02.patch
+$ cd ../
+
+$ mv gegl-ocaml-0.01/ gegl-ocaml-0.02/
+
+$ ls gegl-ocaml-0.02/
+

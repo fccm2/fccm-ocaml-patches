@@ -1,0 +1,217 @@
+diff -Naur gegl-ocaml-0.01/COPYING.md gegl-ocaml-0.02/COPYING.md
+--- gegl-ocaml-0.01/COPYING.md	1970-01-01 01:00:00.000000000 +0100
++++ gegl-ocaml-0.02/COPYING.md	2025-12-23 07:08:53.639993510 +0100
+@@ -0,0 +1,2 @@
++To the extent permitted by law, you can use this package following
++the conditions explained in the file: 'License.txt'
+diff -Naur gegl-ocaml-0.01/examples/Makefile gegl-ocaml-0.02/examples/Makefile
+--- gegl-ocaml-0.01/examples/Makefile	2025-04-02 14:36:37.000000000 +0200
++++ gegl-ocaml-0.02/examples/Makefile	2025-12-23 09:02:39.056780008 +0100
+@@ -1,5 +1,27 @@
+-test:
++test: test1 test2 test3 test4 test5 test6 test7 test8 test9
++test1:
+ 	ocaml -I ../src gegl.cma test_01.ml
++test2:
++	ocaml -I ../src gegl.cma test_02.ml
++test3:
++	ocaml -I ../src gegl.cma test_03.ml
++test4:
++	ocaml -I ../src gegl.cma test_04.ml
++test5:
++	ocaml -I ../src gegl.cma test_05.ml
++test6:
++	ocaml -I ../src gegl.cma test_06.ml
++test7:
++	ocaml -I ../src gegl.cma test_07.ml
++test8:
++	ocaml -I ../src gegl.cma test_08.ml
++test9:
++	ocaml -I ../src gegl.cma test_09.ml
++test4: input.png
++test5: input.png
++input.png: input.jpg
++	convert $< $@
+ clean:
+ 	$(RM) *.cm[iox] *.opt *.o
+ 	$(RM) output.png output6.png output.jpg filtered.jpg
++	$(RM) input.png blured.png croped.png
+diff -Naur gegl-ocaml-0.01/examples/test_09.ml gegl-ocaml-0.02/examples/test_09.ml
+--- gegl-ocaml-0.01/examples/test_09.ml	1970-01-01 01:00:00.000000000 +0100
++++ gegl-ocaml-0.02/examples/test_09.ml	2025-12-23 07:59:07.368899249 +0100
+@@ -0,0 +1,7 @@
++let () =
++  (*
++  Gegl.gegl_init ();
++  *)
++  let major, minor, micro = Gegl.gegl_get_version () in
++  Printf.printf " version: (%d, %d, %d)\n" major minor micro;
++;;
+diff -Naur gegl-ocaml-0.01/src/gegl.ml gegl-ocaml-0.02/src/gegl.ml
+--- gegl-ocaml-0.01/src/gegl.ml	2025-04-02 14:36:37.000000000 +0200
++++ gegl-ocaml-0.02/src/gegl.ml	2025-12-23 08:52:37.171798834 +0100
+@@ -12,6 +12,9 @@
+ external gegl_exit : unit -> unit
+   = "caml_gegl_exit"
+ 
++external gegl_get_version : unit -> (int * int * int)
++  = "caml_gegl_get_version"
++
+ type gegl_rectangle
+ external gegl_rectangle : (int * int * int * int) -> gegl_rectangle
+   = "caml_alloc_gegl_rectangle_new"
+@@ -100,8 +103,7 @@
+   = "caml_gegl_operation_list_properties"
+ 
+ external gegl_node_crop : node -> float * float * float * float -> bool -> node
+-  = "caml_gegl_node_crop_bytecode"
+-    "caml_gegl_node_crop"
++  = "caml_gegl_node_crop"
+ 
+ external gegl_node_gaussian_blur : node -> float -> float -> node
+   = "caml_gegl_node_gaussian_blur"
+@@ -130,6 +132,13 @@
+ external gegl_node_brightness_contrast : node -> brightness:float -> contrast:float -> node
+   = "caml_gegl_node_brightness_contrast"
+ 
++external gegl_node_color_rotate : node ->
++        src_from:float -> src_to:float ->
++        dest_from:float -> dest_to:float ->
++        hue:float -> saturation:float -> node
++  = "caml_gegl_node_color_rotate_bytecode"
++    "caml_gegl_node_color_rotate"
++
+ external gegl_node_negative_darkroom : node -> node
+   = "caml_gegl_node_negative_darkroom"
+ 
+diff -Naur gegl-ocaml-0.01/src/gegl.mli gegl-ocaml-0.02/src/gegl.mli
+--- gegl-ocaml-0.01/src/gegl.mli	2025-04-02 14:36:37.000000000 +0200
++++ gegl-ocaml-0.02/src/gegl.mli	2025-12-23 08:52:20.050799370 +0100
+@@ -8,6 +8,10 @@
+ val gegl_init : unit -> unit
+ val gegl_exit : unit -> unit
+ 
++(** {3 Version} *)
++
++val gegl_get_version : unit -> (int * int * int)
++
+ (** {3 Gegl-kinds} *)
+ 
+ type gegl_rectangle
+@@ -88,6 +92,11 @@
+ 
+ val gegl_node_brightness_contrast : node -> brightness:float -> contrast:float -> node
+ 
++val gegl_node_color_rotate : node ->
++        src_from:float -> src_to:float ->
++        dest_from:float -> dest_to:float ->
++        hue:float -> saturation:float -> node
++
+ val gegl_node_negative_darkroom : node -> node
+ 
+ val gegl_node_normal_map : node -> node
+diff -Naur gegl-ocaml-0.01/src/gegl_stubs.c gegl-ocaml-0.02/src/gegl_stubs.c
+--- gegl-ocaml-0.01/src/gegl_stubs.c	2025-04-02 14:36:37.000000000 +0200
++++ gegl-ocaml-0.02/src/gegl_stubs.c	2025-12-23 08:55:29.371793444 +0100
+@@ -114,6 +114,27 @@
+ }
+ 
+ CAMLprim value
++caml_gegl_get_version(value u)
++{
++  CAMLparam1(u);
++  CAMLlocal1(v);
++
++  int major;
++  int minor;
++  int micro;
++
++  gegl_get_version(&major, &minor, &micro);
++
++  v = caml_alloc(3, 0);
++
++  Store_field(v, 0, Val_int(major));
++  Store_field(v, 1, Val_int(minor));
++  Store_field(v, 2, Val_int(micro));
++
++  CAMLreturn(v);
++}
++
++CAMLprim value
+ caml_alloc_gegl_rectangle_new(value r)
+ {
+   // Alloc Gegl rectangle
+@@ -308,8 +329,13 @@
+ }
+ 
+ CAMLprim value
+-caml_gegl_node_crop(value n, value x, value y, value w, value h, value b)
++caml_gegl_node_crop(value n, value xywh, value b)
+ {
++  value x = Field(xywh, 0);
++  value y = Field(xywh, 1);
++  value w = Field(xywh, 2);
++  value h = Field(xywh, 3);
++
+   GeglNode *node = Gegl_node_val(n);
+   GeglNode *child = gegl_node_new_child(node,
+     "operation", "gegl:crop",
+@@ -324,13 +350,6 @@
+ }
+ 
+ CAMLprim value
+-caml_gegl_node_crop_bytecode(value * argv, int argn)
+-{
+-  return caml_gegl_node_crop(
+-    argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+-}
+-
+-CAMLprim value
+ caml_gegl_node_gaussian_blur(value n, value x, value y)
+ {
+   GeglNode *node = Gegl_node_val(n);
+@@ -439,6 +458,33 @@
+ }
+ 
+ CAMLprim value
++caml_gegl_node_color_rotate(value n, value sf, value st, value df, value dt, value h, value s)
++{
++  GeglNode *node = Gegl_node_val(n);
++  GeglNode *child = gegl_node_new_child(node,
++    "operation", "gegl:color-rotate",
++
++    "src-from", Double_val(sf),
++    "src-to", Double_val(st),
++    "dest-from", Double_val(df),
++    "dest-to", Double_val(dt),
++
++    "hue", Double_val(h),
++    "saturation", Double_val(s),
++    NULL);
++
++  return Val_gegl_node(child);
++}
++
++CAMLprim value
++caml_gegl_node_color_rotate_bytecode(value * argv, int argn)
++{
++  return caml_gegl_node_color_rotate(
++    argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
++}
++
++
++CAMLprim value
+ caml_gegl_node_negative_darkroom(value n)
+ {
+   GeglNode *node = Gegl_node_val(n);
+diff -Naur gegl-ocaml-0.01/src/META gegl-ocaml-0.02/src/META
+--- gegl-ocaml-0.01/src/META	2025-04-02 14:36:37.000000000 +0200
++++ gegl-ocaml-0.02/src/META	2025-12-23 08:58:44.942787331 +0100
+@@ -1,6 +1,6 @@
+ name = "gegl"
+ description = "Interface for the Gegl library"
+-version = "0.01"
++version = "0.02"
+ license = "ISC License"
+ archive(byte) = "gegl.cma"
+ archive(native) = "gegl.cmxa"
