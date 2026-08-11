@@ -74,7 +74,6 @@ wget https://fccm2.github.io/fccm-ocaml-patches/patch/mslpp/mgk-gen-msl-0.01.7p-
 wget https://fccm2.github.io/fccm-ocaml-patches/patch/mslpp/mgk-gen-msl-0.01.7q-7r.patch.lzma
 wget https://fccm2.github.io/fccm-ocaml-patches/patch/mslpp/mgk-gen-msl-0.01.7r-7s.patch.lzma
 wget https://fccm2.github.io/fccm-ocaml-patches/patch/mslpp/mgk-gen-msl-0.01.7s-7t.patch.lzma
-wget https://fccm2.github.io/fccm-ocaml-patches/patch/mslpp/mgk-gen-msl-0.01.7t-7u.patch.lzma
 
 unlzma mgk-gen-msl-0.01.7e-7f.patch.lzma
 unlzma mgk-gen-msl-0.01.7f-7g.patch.lzma
@@ -93,7 +92,7 @@ unlzma mgk-gen-msl-0.01.7p-7q.patch.lzma
 unlzma mgk-gen-msl-0.01.7q-7r.patch.lzma
 unlzma mgk-gen-msl-0.01.7r-7s.patch.lzma
 unlzma mgk-gen-msl-0.01.7s-7t.patch.lzma
-unlzma mgk-gen-msl-0.01.7t-7u.patch.lzma
+cp ../mgk-gen-msl-0.01.7t-7u.patch ./
 
 cd mgk-gen-msl-0.01.7e/
 
@@ -116,6 +115,8 @@ patch -p1 < ../mgk-gen-msl-0.01.7r-7s.patch
 patch -p1 < ../mgk-gen-msl-0.01.7s-7t.patch
 
 patch -p1 < ../mgk-gen-msl-0.01.7t-7u.patch
+patch -p1 < ../mgk-gen-msl-0.01.7u-7v.patch
+patch -p1 < ../mgk-gen-msl-0.01.7v-7w.patch
 
 cd ..
 mv mgk-gen-msl-0.01.7e/ mgk-gen-msl-0.01.7g/
@@ -127,7 +128,9 @@ mv mgk-gen-msl-0.01.7l/ mgk-gen-msl-0.01.7o/
 mv mgk-gen-msl-0.01.7o/ mgk-gen-msl-0.01.7p/
 mv mgk-gen-msl-0.01.7p/ mgk-gen-msl-0.01.7t/
 mv mgk-gen-msl-0.01.7t/ mgk-gen-msl-0.01.7u/
-cd mgk-gen-msl-0.01.7u/
+mv mgk-gen-msl-0.01.7u/ mgk-gen-msl-0.01.7v/
+mv mgk-gen-msl-0.01.7v/ mgk-gen-msl-0.01.7w/
+cd mgk-gen-msl-0.01.7w/
 
 cd src/
 make
@@ -153,6 +156,11 @@ make -f pppo.mk opt
 
 make -f module.mk
 #man ./module.1
+
+make -f module5.mk
+#make -f module5.mk man
+#mv man man5
+#make -f module.mk man
 
 #make ppp
 
